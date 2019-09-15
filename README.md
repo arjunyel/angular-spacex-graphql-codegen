@@ -10,7 +10,7 @@ Our goal is to make an Angular app with a list of the past SpaceX launches along
 
 ![Details view](details-example.jpg)
 
-### Steps
+## Steps
 
 1. Generate a new angular application with routing
 
