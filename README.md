@@ -14,7 +14,7 @@ Our goal is to make an Angular app with a list of the past SpaceX launches along
 
    Make sure to delete the default template in `src/app/app.component.html`
 
-1. Install the [Apollo VS Code plugin](https://marketplace.visualstudio.com/items?itemName=apollographql.vscode-apollo) and in the root of the project add a file `apollo.config.js`
+1. Install the [Apollo VS Code plugin](https://marketplace.visualstudio.com/items?itemName=apollographql.vscode-apollo) and in the root of the project add `apollo.config.js`
 
    ```javascript
    module.exports = {
@@ -27,7 +27,7 @@ Our goal is to make an Angular app with a list of the past SpaceX launches along
    };
    ```
 
-   This points the extension at the SpaceX GraphQL API so we get autocomplete when we make our queries among other cool features like type information.
+   This points the extension at the SpaceX GraphQL API so we get autocomplete, type information, and other cool features in GraphQL files. You may need to restart VS Code.
 
 1. Generate our two components:
 
@@ -98,7 +98,7 @@ Our goal is to make an Angular app with a list of the past SpaceX launches along
 
    Note the first line: `query launchDetails($id: ID!)` When we generate the Angular service the query name is turned into PascalCase and GQL is appended to the end, so the service name for the launch details would be LaunchDetailsGQL. Also in the first line we define any variables we'll need to pass into the query. Please note it's import to include id in the query return so apollo can cache the data.
 
-1. We add [Apollo Angular](https://www.apollographql.com/docs/angular/) to our app with `ng add apollo-angular`. In `src/app/graphql.module.ts` we add our API url `const uri = 'https://api.spacex.land/graphql/';`.
+1. We add [Apollo Angular](https://www.apollographql.com/docs/angular/) to our app with `ng add apollo-angular`. In `src/app/graphql.module.ts` we set our API url `const uri = 'https://api.spacex.land/graphql/';`.
 
 1. Install Graphql Code Generator and the needed plugins `npm i --save-dev @graphql-codegen/cli @graphql-codegen/typescript @graphql-codegen/typescript-apollo-angular @graphql-codegen/typescript-operations`
 
@@ -122,7 +122,7 @@ Our goal is to make an Angular app with a list of the past SpaceX launches along
 
 1. In package.json add a script `"codegen": "gql-gen"` then `npm run codegen` to generate the Angular Services.
 
-1. To make it look nice we add Angular Material `ng add @angular/material` then in the `app.module.ts` we add the card module `import { MatCardModule } from '@angular/material/card';` and put it in imports.
+1. To make it look nice we add Angular Material `ng add @angular/material` then in the `app.module.ts` we import the card module and add to the imports array: `import { MatCardModule } from '@angular/material/card';`
 
 1. Lets start with the list of past launches displayed on the screen:
 
@@ -133,7 +133,7 @@ Our goal is to make an Angular app with a list of the past SpaceX launches along
    export class LaunchListComponent {
      constructor(private readonly pastLaunchesService: PastLaunchesListGQL) {}
 
-     // Please be care to not fetch too much, but this amount lets us see the img lazy loading in action
+     // Please be careful to not fetch too much, but this amount lets us see lazy loading imgs in action
      pastLaunches$ = this.pastLaunchesService
        .fetch({ limit: 30 })
        // Here we extract our query data, we can also get info like errors or loading state from res
@@ -177,7 +177,7 @@ Our goal is to make an Angular app with a list of the past SpaceX launches along
    </ng-container>
    ```
 
-   Notice the cool addition of [lazy loading images](https://web.dev/native-lazy-loading), if you emulate a mobile device and fetch enough launches you should see the images lazy load while you scroll!
+   Notice the cool addition of [lazy loading images](https://web.dev/native-lazy-loading), if you emulate a mobile device in Chrome and fetch enough launches you should see the images lazy load while you scroll!
 
    To make it look nice we add CSS Grid
 
@@ -195,7 +195,7 @@ Our goal is to make an Angular app with a list of the past SpaceX launches along
    }
    ```
 
-1. Next we make the details page for a launch, we need to get the id from the route params and pass that to our service
+1. Next we make the details page for a launch, we get the id from the route params and pass that to our service
 
    ```typescript
    import { ActivatedRoute } from '@angular/router';
@@ -263,3 +263,41 @@ Our goal is to make an Angular app with a list of the past SpaceX launches along
    ```
 
 1. `npm start`, navigate to `http://localhost:4200/`, and it should work!
+
+### Extra Credit: Relative launch times
+
+Thanks to the new builtin [relative time formating](https://v8.dev/features/intl-relativetimeformat) in V8, we can add `launched x days ago`
+
+1. Generate the pipe: `ng g pipe relative-time --module=app.module --flat=false`
+
+1. The pipe takes in the UTC time and returns a formatted string
+
+   ```typescript
+   import { Pipe, PipeTransform } from '@angular/core';
+
+   const milliSecondsInDay = 1000 * 3600 * 24;
+
+   // Cast as any because typescript typing haven't updated yet
+   const rtf = new (Intl as any).RelativeTimeFormat('en');
+
+   @Pipe({
+     name: 'relativeTime'
+   })
+   export class RelativeTimePipe implements PipeTransform {
+     transform(utcTime: string): string {
+       const diffInMillicseconds =
+         new Date(utcTime).getTime() - new Date().getTime();
+       const diffInDays = Math.round(diffInMillicseconds / milliSecondsInDay);
+       return rtf.format(diffInDays, 'day');
+     }
+   }
+   ```
+
+1. Add the pipe to our launch card in src/app/launch-list/launch-list.component.html
+
+   ```html
+   <mat-card-subtitle
+     >{{ launch.rocket.rocket_name }} - launched {{ launch.launch_date_utc |
+     relativeTime }}</mat-card-subtitle
+   >
+   ```

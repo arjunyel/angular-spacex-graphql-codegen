@@ -15,7 +15,10 @@
             alt="Mission patch of {{ launch.mission_name }}"
           />
           <mat-card-title>{{ launch.mission_name }}</mat-card-title>
-          <mat-card-subtitle>{{ launch.rocket.rocket_name }}</mat-card-subtitle>
+          <mat-card-subtitle
+            >{{ launch.rocket.rocket_name }} - launched
+            {{ launch.launch_date_utc | relativeTime }}</mat-card-subtitle
+          >
         </mat-card-header>
         <img
           height="300"
