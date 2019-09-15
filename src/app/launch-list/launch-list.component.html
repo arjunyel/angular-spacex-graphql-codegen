@@ -1,27 +1,31 @@
 <ng-container *ngIf="pastLaunches$ | async as pastLaunches">
-  <mat-card *ngFor="let launch of pastLaunches">
-    <mat-card-header>
-      <img
-        mat-card-avatar
-        loading="lazy"
-        [src]="launch.links.mission_patch_small"
-      />
-      <mat-card-title>{{ launch.mission_name }}</mat-card-title>
-      <mat-card-subtitle>{{ launch.rocket.rocket_name }}</mat-card-subtitle>
-    </mat-card-header>
-    <img
-      style="max-width: 200px; max-height: 200px;"
-      mat-card-image
-      loading="lazy"
-      [src]="launch.links.flickr_images[0]"
-      alt="Photo of {{ launch.mission_name }}"
-    />
-    <!-- <mat-card-content>
-      <p></p>
-    </mat-card-content>
-    <mat-card-actions>
-      <button mat-button>LIKE</button>
-      <button mat-button>SHARE</button>
-    </mat-card-actions> -->
-  </mat-card>
+  <main>
+    <section class="container">
+      <mat-card
+        *ngFor="let launch of pastLaunches"
+        [routerLink]="['/', launch.id]"
+      >
+        <mat-card-header>
+          <img
+            height="50"
+            width="50"
+            mat-card-avatar
+            loading="lazy"
+            [src]="launch.links.mission_patch_small"
+            alt="Mission patch of {{ launch.mission_name }}"
+          />
+          <mat-card-title>{{ launch.mission_name }}</mat-card-title>
+          <mat-card-subtitle>{{ launch.rocket.rocket_name }}</mat-card-subtitle>
+        </mat-card-header>
+        <img
+          height="300"
+          width="300"
+          mat-card-image
+          loading="lazy"
+          [src]="launch.links.flickr_images[0]"
+          alt="Photo of {{ launch.mission_name }}"
+        />
+      </mat-card>
+    </section>
+  </main>
 </ng-container>

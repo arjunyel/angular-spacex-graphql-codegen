@@ -39,7 +39,25 @@ Our goal is to make an Angular app with a list of the past SpaceX launches along
    ng g component launch-details --changeDetection=OnPush
    ```
 
-   Because our generated services use observables we choose OnPush change detection for the best performance. We let up them
+   Because our generated services use observables we choose OnPush change detection for the best performance.
+
+1. In `src/app/app-routing.module.ts` we setup the routing:
+
+   ```typescript
+   import { LaunchListComponent } from './launch-list/launch-list.component';
+   import { LaunchDetailsComponent } from './launch-details/launch-details.component';
+
+   const routes: Routes = [
+     {
+       path: '',
+       component: LaunchListComponent
+     },
+     {
+       path: ':id',
+       component: LaunchDetailsComponent
+     }
+   ];
+   ```
 
 1. Each component will have its own data requirments so we co-locate our graphql query files next to them
 
@@ -50,9 +68,6 @@ Our goal is to make an Angular app with a list of the past SpaceX launches along
      launchesPast(limit: $limit) {
        id
        mission_name
-       launch_site {
-         site_name_long
-       }
        links {
          flickr_images
          mission_patch_small
@@ -60,7 +75,6 @@ Our goal is to make an Angular app with a list of the past SpaceX launches along
        rocket {
          rocket_name
        }
-       launch_success
        launch_date_utc
      }
    }
@@ -72,8 +86,8 @@ Our goal is to make an Angular app with a list of the past SpaceX launches along
    query launchDetails($id: ID!) {
      launch(id: $id) {
        id
+       mission_name
        details
-       launch_success
        links {
          flickr_images
          mission_patch
@@ -111,3 +125,141 @@ Our goal is to make an Angular app with a list of the past SpaceX launches along
 1. To make it look nice we add Angular Material `ng add @angular/material` then in the `app.module.ts` we add the card module `import { MatCardModule } from '@angular/material/card';` and put it in imports.
 
 1. Lets start with the list of past launches displayed on the screen:
+
+   ```typescript
+   import { map } from 'rxjs/operators';
+   import { PastLaunchesListGQL } from '../services/spacexGraphql.service';
+
+   export class LaunchListComponent {
+     constructor(private readonly pastLaunchesService: PastLaunchesListGQL) {}
+
+     // Please be care to not fetch too much, but this amount lets us see the img lazy loading in action
+     pastLaunches$ = this.pastLaunchesService
+       .fetch({ limit: 30 })
+       // Here we extract our query data, we can also get info like errors or loading state from res
+       .pipe(map((res) => res.data.launchesPast));
+   }
+   ```
+
+   ```html
+   <ng-container *ngIf="pastLaunches$ | async as pastLaunches">
+     <main>
+       <section class="container">
+         <mat-card
+           *ngFor="let launch of pastLaunches"
+           [routerLink]="['/', launch.id]"
+         >
+           <mat-card-header>
+             <img
+               height="50"
+               width="50"
+               mat-card-avatar
+               loading="lazy"
+               [src]="launch.links.mission_patch_small"
+               alt="Mission patch of {{ launchDetails.mission_name }}"
+             />
+             <mat-card-title>{{ launch.mission_name }}</mat-card-title>
+             <mat-card-subtitle
+               >{{ launch.rocket.rocket_name }}</mat-card-subtitle
+             >
+           </mat-card-header>
+           <img
+             height="300"
+             width="300"
+             mat-card-image
+             loading="lazy"
+             [src]="launch.links.flickr_images[0]"
+             alt="Photo of {{ launch.mission_name }}"
+           />
+         </mat-card>
+       </section>
+     </main>
+   </ng-container>
+   ```
+
+   Notice the cool addition of [lazy loading images](https://web.dev/native-lazy-loading), if you emulate a mobile device and fetch enough launches you should see the images lazy load while you scroll!
+
+   To make it look nice we add CSS Grid
+
+   ```css
+   .container {
+     padding-top: 20px;
+     display: grid;
+     grid-gap: 30px;
+     grid-template-columns: repeat(auto-fill, 350px);
+     justify-content: center;
+   }
+
+   .mat-card {
+     cursor: pointer;
+   }
+   ```
+
+1. Next we make the details page for a launch, we need to get the id from the route params and pass that to our service
+
+   ```typescript
+   import { ActivatedRoute } from '@angular/router';
+   import { map, switchMap } from 'rxjs/operators';
+   import { LaunchDetailsGQL } from '../services/spacexGraphql.service';
+
+   export class LaunchDetailsComponent {
+     constructor(
+       private readonly route: ActivatedRoute,
+       private readonly launchDetailsService: LaunchDetailsGQL
+     ) {}
+
+     launchDetails$ = this.route.paramMap.pipe(
+       map((params) => params.get('id') as string),
+       switchMap((id) => this.launchDetailsService.fetch({ id })),
+       map((res) => res.data.launch)
+     );
+   }
+   ```
+
+   The HTML looks very similar to the list of launches
+
+   ```html
+   <ng-container *ngIf="launchDetails$ | async as launchDetails">
+     <section style="padding-top: 20px;">
+       <mat-card style="width: 400px; margin: auto;">
+         <mat-card-header>
+           <mat-card-title>{{ launchDetails.mission_name }}</mat-card-title>
+         </mat-card-header>
+         <img
+           height="256"
+           width="256"
+           mat-card-image
+           [src]="launchDetails.links.mission_patch"
+           alt="Mission patch of {{ launchDetails.mission_name }}"
+         />
+         <mat-card-content>
+           <p>{{ launchDetails.details }}</p>
+         </mat-card-content>
+       </mat-card>
+     </section>
+     <section class="photo-grid">
+       <img
+         *ngFor="let pic of launchDetails.links.flickr_images"
+         [src]="pic"
+         alt="Picture of {{ launchDetails.mission_name }}"
+         height="300"
+         width="300"
+         loading="lazy"
+       />
+     </section>
+   </ng-container>
+   ```
+
+   Finally we add CSS Grid for the pictures
+
+   ```css
+   .photo-grid {
+     padding-top: 30px;
+     display: grid;
+     grid-gap: 10px;
+     grid-template-columns: repeat(auto-fill, 300px);
+     justify-content: center;
+   }
+   ```
+
+1. `npm start`, navigate to `http://localhost:4200/`, and it should work!

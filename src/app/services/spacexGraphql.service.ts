@@ -996,7 +996,7 @@ export type LaunchDetailsQuery = (
   { __typename?: 'Query' }
   & { launch: Maybe<(
     { __typename?: 'Launch' }
-    & Pick<Launch, 'details' | 'id' | 'launch_success'>
+    & Pick<Launch, 'id' | 'mission_name' | 'details'>
     & { links: Maybe<(
       { __typename?: 'LaunchLinks' }
       & Pick<LaunchLinks, 'flickr_images' | 'mission_patch'>
@@ -1013,11 +1013,8 @@ export type PastLaunchesListQuery = (
   { __typename?: 'Query' }
   & { launchesPast: Maybe<Array<Maybe<(
     { __typename?: 'Launch' }
-    & Pick<Launch, 'id' | 'mission_name' | 'launch_success' | 'launch_date_utc'>
-    & { launch_site: Maybe<(
-      { __typename?: 'LaunchSite' }
-      & Pick<LaunchSite, 'site_name_long'>
-    )>, links: Maybe<(
+    & Pick<Launch, 'id' | 'mission_name' | 'launch_date_utc'>
+    & { links: Maybe<(
       { __typename?: 'LaunchLinks' }
       & Pick<LaunchLinks, 'flickr_images' | 'mission_patch_small'>
     )>, rocket: Maybe<(
@@ -1030,9 +1027,9 @@ export type PastLaunchesListQuery = (
 export const LaunchDetailsDocument = gql`
     query launchDetails($id: ID!) {
   launch(id: $id) {
-    details
     id
-    launch_success
+    mission_name
+    details
     links {
       flickr_images
       mission_patch
@@ -1053,9 +1050,6 @@ export const PastLaunchesListDocument = gql`
   launchesPast(limit: $limit) {
     id
     mission_name
-    launch_site {
-      site_name_long
-    }
     links {
       flickr_images
       mission_patch_small
@@ -1063,7 +1057,6 @@ export const PastLaunchesListDocument = gql`
     rocket {
       rocket_name
     }
-    launch_success
     launch_date_utc
   }
 }

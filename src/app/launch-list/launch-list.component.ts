@@ -12,6 +12,7 @@ export class LaunchListComponent {
   constructor(private readonly pastLaunchesService: PastLaunchesListGQL) {}
 
   pastLaunches$ = this.pastLaunchesService
-    .fetch({ limit: 10 })
-    .pipe(map((res) => res.data));
+    // Please be care to not fetch too much, but this amount lets us see the img lazy loading in action
+    .fetch({ limit: 30 })
+    .pipe(map((res) => res.data.launchesPast));
 }
