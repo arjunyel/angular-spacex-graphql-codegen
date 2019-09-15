@@ -1,0 +1,13 @@
+# src/app/launch-details/launch-details.frontend.graphql
+
+query launchDetails($id: ID!) {
+  launch(id: $id) {
+    details
+    id
+    launch_success
+    links {
+      flickr_images
+      mission_patch
+    }
+  }
+}

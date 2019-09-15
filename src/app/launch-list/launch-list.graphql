@@ -1,0 +1,20 @@
+# src/app/launch-list/launch-list.frontend.graphql
+
+query pastLaunchesList($limit: Int!) {
+  launchesPast(limit: $limit) {
+    id
+    mission_name
+    launch_site {
+      site_name_long
+    }
+    links {
+      flickr_images
+      mission_patch_small
+    }
+    rocket {
+      rocket_name
+    }
+    launch_success
+    launch_date_utc
+  }
+}
