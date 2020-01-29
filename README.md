@@ -162,7 +162,7 @@ Our goal is to make an Angular app with a list of the past SpaceX launches along
                mat-card-avatar
                loading="lazy"
                [src]="launch.links.mission_patch_small"
-               alt="Mission patch of {{ launchDetails.mission_name }}"
+               alt="Mission patch of {{ launch.mission_name }}"
              />
              <mat-card-title>{{ launch.mission_name }}</mat-card-title>
              <mat-card-subtitle
