@@ -1,6 +1,6 @@
 # Where to get schema data
 schema:
-  - https://api.spacex.land/graphql/
+  - https://spacex-production.up.railway.app/
 # The client side queries to turn into services
 documents:
   - src/**/*.graphql

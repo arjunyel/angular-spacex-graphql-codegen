@@ -27,7 +27,7 @@ Our goal is to make an Angular app with a list of the past SpaceX launches along
      client: {
        service: {
          name: 'angular-spacex-graphql-codegen',
-         url: 'https://api.spacex.land/graphql/'
+         url: 'https://spacex-production.up.railway.app/'
        }
      }
    };
@@ -104,7 +104,7 @@ Our goal is to make an Angular app with a list of the past SpaceX launches along
 
    Note the first line: `query launchDetails($id: ID!)` When we generate the Angular service the query name is turned into PascalCase and GQL is appended to the end, so the service name for the launch details would be LaunchDetailsGQL. Also in the first line we define any variables we'll need to pass into the query. Please note it's import to include id in the query return so apollo can cache the data.
 
-1. We add [Apollo Angular](https://www.apollographql.com/docs/angular/) to our app with `ng add apollo-angular`. In `src/app/graphql.module.ts` we set our API url `const uri = 'https://api.spacex.land/graphql/';`.
+1. We add [Apollo Angular](https://www.apollographql.com/docs/angular/) to our app with `ng add apollo-angular`. In `src/app/graphql.module.ts` we set our API url `const uri = 'https://spacex-production.up.railway.app/';`.
 
 1. Install Graphql Code Generator and the needed plugins `npm i --save-dev @graphql-codegen/cli @graphql-codegen/typescript @graphql-codegen/typescript-apollo-angular @graphql-codegen/typescript-operations`
 
@@ -113,7 +113,7 @@ Our goal is to make an Angular app with a list of the past SpaceX launches along
    ```yml
    # Where to get schema data
    schema:
-     - https://api.spacex.land/graphql/
+     - https://spacex-production.up.railway.app/
    # The client side queries to turn into services
    documents:
      - src/**/*.graphql
